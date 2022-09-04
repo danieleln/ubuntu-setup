@@ -1,0 +1,124 @@
+#!/usr/bin/bash
+
+# check if a program exists
+function exists ()
+{
+    if command -v "$1" &> /dev/null
+    then
+        true
+    else
+        false
+    fi
+}
+
+
+# function that ask for user confirmation
+function userConfirm ()
+{
+    echo "Do you want to install $1? [y/n]"
+    read answer
+
+    if [[ "$answer" == 'y' || $answer == 'Y' ]]
+    then
+        true
+    else
+        false
+    fi
+}
+
+
+function installingPrompt ()
+{
+    echo "Installing $1..."
+}
+
+
+function installationExitCode ()
+{
+    if (( $? == 0 ))
+    then
+        echo "Successful installation"
+    else
+        echo "Something went wrong during the installation"
+    fi
+}
+
+
+
+# verify that the program is not installed
+# than, ask for confirmation and install it
+function install ()
+{
+    # name of the program run in bas
+    declare PROG_BASH_NAME=""
+
+    # name of the apt package
+    declare PROG_APT_NAME=""
+
+
+    PROG_BASH_NAME=$1
+
+    if (( $# == 1 ))
+    then
+        PROG_APT_NAME=$PROG_BASH_NAME
+    else
+        PROG_APT_NAME="$2"
+    fi
+
+
+    if ! exists $PROG_BASH_NAME
+    then
+        if userConfirm $PROG_BASH_NAME
+        then
+            installingPrompt "$PROG_BASH_NAME"
+            apt install $PROG_APT_NAME &> /dev/null
+            installationExitCode
+        fi
+    fi
+}
+
+
+install tree
+install unzip
+install nvim neovim
+install neofetch
+
+# installing plug (plugin manager for vim/neovim)
+declare -r PLUG_DIR="$HOME/.config/nvim/autoload"
+declare -r PLUG_FILE="$PLUG_DIR/plug.vim"
+
+if ! [ -f "$PLUG_FILE" ]
+then
+    if userConfirm "vim-plug"
+    then
+        installingPrompt "vim-plug"
+        curl -fLo "$PLUG_FILE" --create-dirs \
+            "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &> /dev/null
+        installationExitCode
+    fi
+fi
+
+
+# installing oh my posh
+if ! exists "oh-my-posh"
+then
+    if userConfirm "oh-my-posh"
+    then
+        # installing oh-my-posh
+        installingPrompt "oh-my-posh"
+        wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh" &> /dev/null && \
+        chmod +x "/usr/local/bin/oh-my-posh" &> /dev/null
+        installationCodeExit
+
+        # installing oh-my-posh themes
+        installingPrompt "oh-my-posh themes"
+        declare -r OMP_THEMES_DIR="$HOME/.config/oh-my-posh/themes" &> /dev/null && \
+        mkdir $OMP_THEMES_DIR &> /dev/null
+        wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip &> /dev/null && \
+        unzip /tmp/themes.zip -d $OMP_THEMES_DIR &> /dev/null && \
+        chmod u+rw "$OMP_THEMES_DIR/*.omp.*" &> /dev/null && \
+        rm /tmp/themes.zip &> /dev/null
+        installationCodeExit
+        
+    fi
+fi 
