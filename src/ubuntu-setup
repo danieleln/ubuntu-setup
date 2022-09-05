@@ -83,7 +83,7 @@ function install ()
         if userConfirm $PROG_BASH_NAME
         then
             installingPrompt "$PROG_BASH_NAME"
-            apt install $PROG_APT_NAME &> /dev/null
+            apt install $PROG_APT_NAME -y &> /dev/null
             installationExitCode
         fi
     fi
@@ -120,7 +120,7 @@ then
         installingPrompt "oh-my-posh"
         wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh" &> /dev/null && \
         chmod +x "/usr/local/bin/oh-my-posh" &> /dev/null
-        installationCodeExit
+        installationExitCode
 
         # installing oh-my-posh themes
         installingPrompt "oh-my-posh themes"
@@ -130,7 +130,7 @@ then
         unzip /tmp/themes.zip -d $OMP_THEMES_DIR &> /dev/null && \
         chmod u+rw "$OMP_THEMES_DIR/*.omp.*" &> /dev/null && \
         rm /tmp/themes.zip &> /dev/null
-        installationCodeExit
+        installationExitCode
         
     fi
 fi 
