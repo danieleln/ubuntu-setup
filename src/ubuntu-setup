@@ -15,7 +15,7 @@ declare -r USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 # check if a program exists
 function exists ()
 {
-    if command -v "$1" &> /dev/null
+    if command -v "$1" 
     then
         true
     else
@@ -49,9 +49,11 @@ function installationExitCode ()
 {
     if (( $? == 0 ))
     then
-        echo "Successful installation"
+        echo "Installation was successful!"
+        echo
     else
-        echo "Something went wrong during the installation"
+        echo "Something went wrong during the installation :("
+        echo
     fi
 }
 
@@ -83,9 +85,19 @@ function install ()
         if userConfirm $PROG_BASH_NAME
         then
             installingPrompt "$PROG_BASH_NAME"
-            apt install $PROG_APT_NAME -y &> /dev/null
+            apt install $PROG_APT_NAME -y
             installationExitCode
         fi
+    fi
+}
+
+
+# make dir if it doesn't exists
+function smkdir ()
+{
+    if ! [ -d "$1" ]
+    then
+        command mkdir -p  "$1"
     fi
 }
 
@@ -105,7 +117,7 @@ then
     then
         installingPrompt "vim-plug"
         curl -fLo "$PLUG_FILE" --create-dirs \
-            "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &> /dev/null
+            "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" 
         installationExitCode
     fi
 fi
@@ -118,18 +130,18 @@ then
     then
         # installing oh-my-posh
         installingPrompt "oh-my-posh"
-        wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh" &> /dev/null && \
-        chmod +x "/usr/local/bin/oh-my-posh" &> /dev/null
+        wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh"  && \
+        chmod +x "/usr/local/bin/oh-my-posh" 
         installationExitCode
 
         # installing oh-my-posh themes
         installingPrompt "oh-my-posh themes"
-        declare -r OMP_THEMES_DIR="$USER_HOME/.config/oh-my-posh/themes" &> /dev/null && \
-        mkdir $OMP_THEMES_DIR &> /dev/null
-        wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip &> /dev/null && \
-        unzip /tmp/themes.zip -d $OMP_THEMES_DIR &> /dev/null && \
-        chmod u+rw "$OMP_THEMES_DIR/*.omp.*" &> /dev/null && \
-        rm /tmp/themes.zip &> /dev/null
+        declare -r OMP_THEMES_DIR="$USER_HOME/.config/oh-my-posh/themes"  && \
+        smkdir $OMP_THEMES_DIR 
+        wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip  && \
+        unzip /tmp/themes.zip -d $OMP_THEMES_DIR  && \
+        chmod u+rw "$OMP_THEMES_DIR/*.omp.*"  && \
+        rm /tmp/themes.zip 
         installationExitCode
         
     fi
