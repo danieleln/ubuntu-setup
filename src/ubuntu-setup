@@ -1,5 +1,17 @@
 #!/usr/bin/bash
 
+# check for root permission
+if ! (( $(id -u) == 0 ))
+then
+    >&2 echo "This script requires root permission, run it with sudo!"
+    exit 1
+fi
+
+
+# user's home directory
+declare -r USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+
+
 # check if a program exists
 function exists ()
 {
@@ -84,7 +96,7 @@ install nvim neovim
 install neofetch
 
 # installing plug (plugin manager for vim/neovim)
-declare -r PLUG_DIR="$HOME/.config/nvim/autoload"
+declare -r PLUG_DIR="$USER_HOME/.config/nvim/autoload"
 declare -r PLUG_FILE="$PLUG_DIR/plug.vim"
 
 if ! [ -f "$PLUG_FILE" ]
@@ -112,7 +124,7 @@ then
 
         # installing oh-my-posh themes
         installingPrompt "oh-my-posh themes"
-        declare -r OMP_THEMES_DIR="$HOME/.config/oh-my-posh/themes" &> /dev/null && \
+        declare -r OMP_THEMES_DIR="$USER_HOME/.config/oh-my-posh/themes" &> /dev/null && \
         mkdir $OMP_THEMES_DIR &> /dev/null
         wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip &> /dev/null && \
         unzip /tmp/themes.zip -d $OMP_THEMES_DIR &> /dev/null && \
