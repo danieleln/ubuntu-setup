@@ -140,7 +140,7 @@ then
         smkdir $OMP_THEMES_DIR 
         wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip  && \
         unzip /tmp/themes.zip -d $OMP_THEMES_DIR  && \
-        chmod u+rw "$OMP_THEMES_DIR/*.omp.*"  && \
+        chmod u+rw $OMP_THEMES_DIR/*.omp.*  && \
         rm /tmp/themes.zip 
         installationExitCode
         
