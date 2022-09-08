@@ -117,9 +117,11 @@ then
     then
         installingPrompt "vim-plug"
         smkdir $PLUG_DIR  && \
+        chown $SUDO_USER $PLUG_DIR && \
         chmod u+rwx $PLUG_DIR  && \
         curl -fLo "$PLUG_FILE" --create-dirs \
             "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" 
+        chown $SUDO_USER $PLUG_FILE && \
         installationExitCode
     fi
 fi
@@ -140,9 +142,11 @@ then
         installingPrompt "oh-my-posh themes"
         declare -r OMP_THEMES_DIR="$USER_HOME/.config/oh-my-posh/themes"  && \
         smkdir $OMP_THEMES_DIR  && \
+        chown $SUDO_USER $OMP_THEMES_DIR  && \
         chmod u+rwx $OMP_THEMES_DIR  && \
         wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip  && \
         unzip /tmp/themes.zip -d $OMP_THEMES_DIR  && \
+        chown $SUDO_USER $OMP_THEMES_DIR/*.omp.*  && \
         chmod u+rw $OMP_THEMES_DIR/*.omp.*  && \
         rm /tmp/themes.zip 
         installationExitCode
