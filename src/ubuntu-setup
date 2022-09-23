@@ -82,6 +82,11 @@ fi
 
 
 
+# serious development tools
+installFromApt sl
+installFromApt cowsay
+installFromApt neofetch
+# actual tools
 installFromApt tree
 installFromApt unzip
 installFromApt nvim neovim
