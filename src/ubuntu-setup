@@ -1,21 +1,10 @@
 #!/usr/bin/bash
 
-# check for root permission
-if ! (( $(id -u) == 0 ))
-then
-    >&2 echo "This script requires root permission, run it with sudo!"
-    exit 1
-fi
 
-
-# user's home directory
-declare -r USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-
-
-# check if a program exists
-function exists ()
+# verify if a program is installed
+isInstalled ()
 {
-    if command -v "$1" 
+    if command -v "$1" > /dev/null
     then
         true
     else
@@ -24,13 +13,13 @@ function exists ()
 }
 
 
-# function that ask for user confirmation
-function userConfirm ()
+# ask to the user whether to install a program
+userConfirmsInstallation ()
 {
     echo "Do you want to install $1? [y/n]"
     read answer
 
-    if [[ "$answer" == 'y' || $answer == 'Y' ]]
+    if [[ "$answer" == 'y' || "$answer" == 'Y' ]]
     then
         true
     else
@@ -39,57 +28,35 @@ function userConfirm ()
 }
 
 
-function installingPrompt ()
+installFromApt ()
 {
-    echo "Installing $1..."
-}
-
-
-function installationExitCode ()
-{
-    if (( $? == 0 ))
-    then
-        echo "Installation was successful!"
-        echo
-    else
-        echo "Something went wrong during the installation :("
-        echo
-    fi
-}
-
-
-
-# verify that the program is not installed
-# than, ask for confirmation and install it
-function install ()
-{
-    # name of the program run in bas
-    declare PROG_BASH_NAME=""
+    # name of the program run in bash
+    declare BASH_PROGRAM_NAME=""
 
     # name of the apt package
-    declare PROG_APT_NAME=""
+    declare APT_PACKAGE_NAME=""
 
 
-    PROG_BASH_NAME=$1
+    BASH_PROGRAM_NAME=$1
+
 
     if (( $# == 1 ))
     then
-        PROG_APT_NAME=$PROG_BASH_NAME
+        APT_PACKAGE_NAME=$BASH_PROGRAM_NAME
     else
-        PROG_APT_NAME="$2"
+        APT_PACKAGE_NAME="$2"
     fi
 
 
-    if ! exists $PROG_BASH_NAME
+    if ! isInstalled $BASH_PROGRAM_NAME
     then
-        if userConfirm $PROG_BASH_NAME
+        if userConfirmsInstallation $BASH_PROGRAM_NAME
         then
-            installingPrompt "$PROG_BASH_NAME"
-            apt install $PROG_APT_NAME -y
-            installationExitCode
+            sudo apt install $APT_PACKAGE_NAME -y
         fi
     fi
 }
+
 
 
 # make dir if it doesn't exists
@@ -102,54 +69,59 @@ function smkdir ()
 }
 
 
-install tree
-install unzip
-install nvim neovim
-install neofetch
+
+# check for root permission
+if (( $(id -u) == 0 ))
+then
+    >&2 echo "Do not run the script with sudo permissions straight away!"
+    exit 1
+fi
+
+
+
+
+
+
+installFromApt tree
+installFromApt unzip
+installFromApt nvim neovim
 
 # installing plug (plugin manager for vim/neovim)
-declare -r PLUG_DIR="$USER_HOME/.config/nvim/autoload"
+declare -r PLUG_DIR="$HOME/.config/nvim/autoload"
 declare -r PLUG_FILE="$PLUG_DIR/plug.vim"
 
 if ! [ -f "$PLUG_FILE" ]
 then
-    if userConfirm "vim-plug"
+    if userConfirmsInstallation "vim-plug"
     then
-        installingPrompt "vim-plug"
-        smkdir $PLUG_DIR  && \
-        chown $SUDO_USER $PLUG_DIR && \
-        chmod u+rwx $PLUG_DIR  && \
+        smkdir $PLUG_DIR
         curl -fLo "$PLUG_FILE" --create-dirs \
             "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" 
-        chown $SUDO_USER $PLUG_FILE && \
-        installationExitCode
     fi
 fi
 
 
 # installing oh my posh
-if ! exists "oh-my-posh"
+if ! isInstalled "oh-my-posh"
 then
-    if userConfirm "oh-my-posh"
+    if userConfirmsInstallation "oh-my-posh"
     then
         # installing oh-my-posh
-        installingPrompt "oh-my-posh"
-        wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh"  && \
+        wget "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64" -O "/usr/local/bin/oh-my-posh"
         chmod +x "/usr/local/bin/oh-my-posh" 
-        installationExitCode
-
-        # installing oh-my-posh themes
-        installingPrompt "oh-my-posh themes"
-        declare -r OMP_THEMES_DIR="$USER_HOME/.config/oh-my-posh/themes"  && \
-        smkdir $OMP_THEMES_DIR  && \
-        chown $SUDO_USER $OMP_THEMES_DIR  && \
-        chmod u+rwx $OMP_THEMES_DIR  && \
-        wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip  && \
-        unzip /tmp/themes.zip -d $OMP_THEMES_DIR  && \
-        chown $SUDO_USER $OMP_THEMES_DIR/*.omp.*  && \
-        chmod u+rw $OMP_THEMES_DIR/*.omp.*  && \
-        rm /tmp/themes.zip 
-        installationExitCode
-        
     fi
 fi 
+
+
+# installing oh-my-posh themes
+if userConfirmsInstallation "oh-my-posh themes"
+then
+    declare -r OMP_THEMES_DIR="$HOME/.config/oh-my-posh/themes"
+
+    smkdir $OMP_THEMES_DIR  && \
+    wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O /tmp/themes.zip  && \
+    unzip /tmp/themes.zip -d $OMP_THEMES_DIR  && \
+    chmod u+rw $OMP_THEMES_DIR/*.omp.*  && \
+    rm /tmp/themes.zip 
+fi
+
