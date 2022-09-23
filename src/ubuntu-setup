@@ -118,8 +118,8 @@ then
 fi 
 
 
-# installing oh-my-posh themes
-if userConfirmsInstallation "oh-my-posh themes"
+# installing oh-my-posh-themes
+if userConfirmsInstallation "oh-my-posh-themes"
 then
     declare -r OMP_THEMES_DIR="$HOME/.config/oh-my-posh/themes"
 

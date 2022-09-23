@@ -7,10 +7,13 @@ Since I find it quite tedious, I decided to try to build a little script that do
 This script installs the following softwares
 - tree
 - unzip
-- neofetch
 - neovim
 - vim-plug
 - oh-my-posh
+- oh-my-posh-themes
+- neofetch
+- cowsay
+- sl
 
 ## Usage
 At the moment, this script is based on the apt package manager (up to now, I've worked only with ubuntu-derived distros). <br/>
